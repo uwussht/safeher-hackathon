@@ -72,6 +72,20 @@ npm install && npm run dev
 > App available at: http://localhost:5173  
 > Admin dashboard at: http://localhost:5173/admin
 
+## Environment Variables
+
+The `.env` file is not included in this repo for security reasons.  
+Create your own `api/.env` file with the following:
+
+```bash
+GROQ_API_KEY=your_groq_api_key_here
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/safeher
+VITE_API_URL=http://localhost:8000
+```
+
+Get a free Groq API key at **https://console.groq.com** → sign up → API Keys → Create API Key. 
+Paste it as the value for `GROQ_API_KEY`.
+
 ---
 
 ## What's mocked
