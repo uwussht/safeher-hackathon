@@ -1,0 +1,98 @@
+[
+  {
+    "name": "Закон РК «О государственных гарантиях равных прав и равных возможностей мужчин и женщин» (2009)",
+    "type": "law_summary",
+    "topic": "gender_equality",
+    "city": "national",
+    "description": "Guarantees equal rights and opportunities for men and women in employment, education, and political participation. If you believe you've been discriminated against based on sex, this law provides the legal basis for a complaint.",
+    "phone": null
+  },
+  {
+    "name": "CEDAW — Convention on the Elimination of All Forms of Discrimination Against Women",
+    "type": "law_summary",
+    "topic": "gender_equality",
+    "city": "national",
+    "description": "Kazakhstan ratified this UN convention in 1998, committing to eliminate discrimination against women in all areas of life, including marriage, family, employment, and political participation. International human rights bodies monitor compliance.",
+    "phone": null
+  },
+  {
+    "name": "Конституция РК, статьи о равенстве прав",
+    "type": "law_summary",
+    "topic": "gender_equality",
+    "city": "national",
+    "description": "The Constitution of Kazakhstan guarantees equal rights regardless of sex. This forms the basis for challenging discriminatory treatment in courts.",
+    "phone": null
+  },
+  {
+    "name": "Закон РК «О профилактике бытового насилия»",
+    "type": "law_summary",
+    "topic": "domestic_violence",
+    "city": "national",
+    "description": "Establishes protections against domestic violence, including the right to request a protective order from police and obligations for law enforcement to respond to domestic violence reports.",
+    "phone": null
+  },
+  {
+    "name": "Бюро национального омбудсмена по правам человека",
+    "type": "legal_aid",
+    "topic": "gender_equality",
+    "city": "national",
+    "description": "National Human Rights Ombudsman's office — can receive complaints about discrimination, including gender-based discrimination in employment or public services.",
+    "phone": "1408"
+  },
+  {
+    "name": "Государственная юридическая помощь (бесплатная)",
+    "type": "legal_aid",
+    "topic": "general",
+    "city": "national",
+    "description": "Kazakhstan provides free state legal aid for certain categories, including victims of domestic violence and low-income individuals. Available through local legal aid centers (юридические консультации).",
+    "phone": "1414"
+  },
+  {
+    "name": "Закон «О профилактике правонарушений» (объединённый, действует с конца 2025 г.)",
+    "type": "law_summary",
+    "topic": "domestic_violence",
+    "city": "national",
+    "description": "As of late 2025, the standalone 'Law on Prevention of Domestic Violence' (in effect since 2009) was merged into a broader 'Law on Crime Prevention' along with four other laws. Protections for domestic violence victims still exist within this merged law, including protective orders, restraining orders, and access to social/psychological support, but the dedicated framework that previously existed is gone.",
+    "phone": null
+  },
+  {
+    "name": "Защитное предписание (protective order)",
+    "type": "law_summary",
+    "topic": "domestic_violence",
+    "city": "national",
+    "description": "A protective order can prohibit an abuser from contacting the survivor for up to 30 days. Survivors also have the right to access shelter and other social services. Request this through local police.",
+    "phone": null
+  },
+  {
+    "name": "«Закон Салтанат» (2024) — криминализация домашнего насилия",
+    "type": "law_summary",
+    "topic": "domestic_violence",
+    "city": "national",
+    "description": "Passed in April 2024 following the high-profile Saltanat Nukenova case, this law moved assault and intentional minor bodily harm from administrative offenses to the Criminal Code, making penalties for domestic violence significantly harsher. If you've experienced physical violence from a family member, this can now be prosecuted as a criminal offense, not just an administrative one.",
+    "phone": null
+  },
+  {
+    "name": "ОЮЛ «Союз кризисных центров»",
+    "type": "legal_aid",
+    "topic": "domestic_violence",
+    "city": "national",
+    "description": "Union of Crisis Centers — a national network of crisis centers supporting domestic violence survivors, advocating for stronger legal protections. Can help connect survivors to local shelters and legal support.",
+    "phone": null
+  },
+  {
+    "name": "Фонд «НеМолчи.kz»",
+    "type": "legal_aid",
+    "topic": "domestic_violence",
+    "city": "national",
+    "description": "A foundation focused on domestic violence awareness and support for women and children, who are described as the most vulnerable groups to violence in Kazakhstan.",
+    "phone": null
+  },
+  {
+    "name": "Межведомственная система раннего выявления семей в трудной ситуации",
+    "type": "law_summary",
+    "topic": "domestic_violence",
+    "city": "national",
+    "description": "Under the merged law, an inter-agency system is supposed to identify families in crisis early and coordinate police, healthcare, and social services responses — though advocates note the new law lacks the detailed step-by-step procedures the old law had for each agency.",
+    "phone": null
+  }
+]
