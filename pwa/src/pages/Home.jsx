@@ -80,7 +80,6 @@ export default function Home() {
 const navItems = [
   { label: 'Home/Safety', icon: <Shield size={17} />, path: '/' },
   { label: 'SafeHer AI', icon: <HeadphonesIcon size={17} />, path: '/resources' },
-  { label: 'Resource Map', icon: <Map size={17} />, path: '/resources-map' },
   { label: 'Profile', icon: <User size={17} />, path: '/profile' },
 ];
 

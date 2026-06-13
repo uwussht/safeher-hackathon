@@ -1,6 +1,7 @@
 // src/pages/Admin.jsx
 
 import { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { MapContainer, TileLayer, CircleMarker, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -37,23 +38,22 @@ const navGroups = [
   {
     label: 'NAVIGATION',
     items: [
-      { label: 'Overview', icon: <LayoutGrid size={16} /> },
-      { label: 'Incident Map', icon: <Map size={16} /> },
-      { label: 'Advanced Intel', icon: <Database size={16} /> },
-      { label: 'Activity Logs', icon: <FileText size={16} /> },
+      { label: 'Overview',       icon: <LayoutGrid size={16} />, path: '/admin' },
+      { label: 'Incident Map',   icon: <Map size={16} />,        path: '/admin/map' },
+      { label: 'Advanced Intel', icon: <Database size={16} />,   path: '/admin/intel' },
+      { label: 'Activity Logs',  icon: <FileText size={16} />,   path: '/admin/logs' },
     ],
   },
   {
     label: 'ADMINISTRATION',
     items: [
-      { label: 'System Config', icon: <Settings size={16} /> },
+      { label: 'System Config', icon: <Settings size={16} />, path: '/admin/config' },
     ],
   },
 ];
 
 function HeatmapLayer({ points }) {
   const map = useMap();
-
   useEffect(() => {
     if (!points.length) return;
     let layer;
@@ -62,16 +62,13 @@ function HeatmapLayer({ points }) {
     script.onload = () => {
       const heatPoints = points.map((p) => [p.lat, p.lng, p.weight ?? 1]);
       layer = L.heatLayer(heatPoints, {
-        radius: 35,
-        blur: 25,
-        maxZoom: 10,
+        radius: 35, blur: 25, maxZoom: 10,
         gradient: { 0.3: '#378ADD', 0.6: '#EF9F27', 1.0: '#E24B4A' },
       }).addTo(map);
     };
     document.head.appendChild(script);
     return () => { if (layer) map.removeLayer(layer); };
   }, [points, map]);
-
   return null;
 }
 
@@ -84,7 +81,7 @@ function ZoomControls() {
       backgroundColor: '#1a1a1a', borderRadius: '0.75rem',
       border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden',
     }}>
-      <button onClick={() => map.zoomIn()} style={zoomBtnStyle}><Plus size={16} color="#fff" /></button>
+      <button onClick={() => map.zoomIn()}  style={zoomBtnStyle}><Plus  size={16} color="#fff" /></button>
       <div style={{ height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
       <button onClick={() => map.zoomOut()} style={zoomBtnStyle}><Minus size={16} color="#fff" /></button>
     </div>
@@ -99,20 +96,17 @@ const zoomBtnStyle = {
 
 function Toggle({ on, onChange }) {
   return (
-    <div
-      onClick={onChange}
-      style={{
-        width: '38px', height: '21px', borderRadius: '9999px',
-        backgroundColor: on ? C.onSurface : '#d0d0d8',
-        position: 'relative', cursor: 'pointer', flexShrink: 0,
-        transition: 'background-color 0.2s',
-      }}>
+    <div onClick={onChange} style={{
+      width: '38px', height: '21px', borderRadius: '9999px',
+      backgroundColor: on ? C.onSurface : '#d0d0d8',
+      position: 'relative', cursor: 'pointer', flexShrink: 0,
+      transition: 'background-color 0.2s',
+    }}>
       <div style={{
         position: 'absolute', top: '2.5px',
         left: on ? '19px' : '2.5px',
         width: '16px', height: '16px', borderRadius: '9999px',
-        backgroundColor: '#fff',
-        transition: 'left 0.2s',
+        backgroundColor: '#fff', transition: 'left 0.2s',
         boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
       }} />
     </div>
@@ -120,7 +114,10 @@ function Toggle({ on, onChange }) {
 }
 
 export default function Admin() {
-  const [activeNav, setActiveNav] = useState('Incident Map');
+  const navigate = useNavigate();
+  const location = useLocation();
+  const currentPath = location.pathname;
+
   const [data, setData] = useState({ points: [], stats: {} });
   const [loading, setLoading] = useState(true);
   const [categoryToggles, setCategoryToggles] = useState({
@@ -139,8 +136,7 @@ export default function Admin() {
     let cancelled = false;
     setLoading(true);
     const params = new URLSearchParams({
-      window: activeWindow,
-      severity: severityPos,
+      window: activeWindow, severity: severityPos,
       physical_disturbance: categoryToggles.physical_disturbance,
       harassment_protocols: categoryToggles.harassment_protocols,
       emergency_support: categoryToggles.emergency_support,
@@ -157,20 +153,18 @@ export default function Admin() {
     window.open(`${API}/api/admin/export?window=${encodeURIComponent(activeWindow)}`, '_blank');
   }
 
-  const stats = data.stats || {};
+  const stats   = data.stats   || {};
   const byThreat = stats.by_threat || {};
-  const points = data.points || [];
+  const points  = data.points  || [];
 
   return (
     <div style={{
-      display: 'flex',
-      height: '100%',
+      display: 'flex', height: '100%',
       fontFamily: "'Inter', system-ui, sans-serif",
-      backgroundColor: C.surface,
-      overflow: 'hidden',
+      backgroundColor: C.surface, overflow: 'hidden',
     }}>
 
-      {/* Sidebar */}
+      {/* ── Sidebar ── */}
       <div style={{
         width: '220px', flexShrink: 0,
         backgroundColor: C.surface,
@@ -201,11 +195,11 @@ export default function Admin() {
               }}>{group.label}</p>
               <div style={{ padding: '0 10px', display: 'flex', flexDirection: 'column', gap: '1px' }}>
                 {group.items.map((item) => {
-                  const isActive = item.path === currentPath;
+                  const isActive = currentPath === item.path;
                   return (
                     <button
                       key={item.label}
-                      onClick={() => setActiveNav(item.label)}
+                      onClick={() => navigate(item.path)}
                       style={{
                         display: 'flex', alignItems: 'center', gap: '9px',
                         padding: '9px 12px', borderRadius: '0.625rem',
@@ -217,8 +211,7 @@ export default function Admin() {
                         textAlign: 'left',
                       }}
                     >
-                      {item.icon}
-                      {item.label}
+                      {item.icon}{item.label}
                     </button>
                   );
                 })}
@@ -228,18 +221,14 @@ export default function Admin() {
         </div>
 
         <div style={{
-          margin: '0 10px',
-          padding: '10px 12px',
-          borderRadius: '0.75rem',
-          border: `1px solid ${C.outlineVariant}`,
-          display: 'flex', alignItems: 'center', gap: '10px',
-          cursor: 'pointer',
+          margin: '0 10px', padding: '10px 12px',
+          borderRadius: '0.75rem', border: `1px solid ${C.outlineVariant}`,
+          display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer',
         }}>
           <div style={{
             width: '30px', height: '30px', borderRadius: '9999px',
             backgroundColor: C.onSurface,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
           }}>
             <span style={{ fontSize: '10px', fontWeight: '500', color: '#fff' }}>AU</span>
           </div>
@@ -251,7 +240,7 @@ export default function Admin() {
         </div>
       </div>
 
-      {/* Main */}
+      {/* ── Main ── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
         {/* Top bar */}
@@ -263,10 +252,9 @@ export default function Admin() {
           padding: '0 24px', flexShrink: 0,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <h2 style={{
-              margin: 0, fontSize: '14px', fontWeight: '500',
-              color: C.onSurface, letterSpacing: '-0.01em',
-            }}>Real-time Incident Monitoring</h2>
+            <h2 style={{ margin: 0, fontSize: '14px', fontWeight: '500', color: C.onSurface, letterSpacing: '-0.01em' }}>
+              Real-time Incident Monitoring
+            </h2>
             <div style={{
               display: 'flex', alignItems: 'center', gap: '5px',
               padding: '4px 10px', borderRadius: '9999px',
@@ -291,26 +279,21 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* Content: map + right panel */}
+        {/* Content */}
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
 
           {/* Map area */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative', backgroundColor: '#0a0a0a' }}>
 
             {/* Stat cards overlay */}
-            <div style={{
-              position: 'absolute', top: '16px', left: '16px', zIndex: 999,
-              display: 'flex', gap: '10px',
-            }}>
+            <div style={{ position: 'absolute', top: '16px', left: '16px', zIndex: 999, display: 'flex', gap: '10px' }}>
               {[
                 { label: 'ACTIVATIONS (24H)', value: stats.activations_24h ?? stats.total ?? 0, delta: stats.activations_delta },
-                { label: 'RESPONSE LATENCY', value: stats.response_latency ?? '—', delta: stats.latency_delta },
+                { label: 'RESPONSE LATENCY',  value: stats.response_latency ?? '—',             delta: stats.latency_delta },
               ].map((s) => (
                 <div key={s.label} style={{
-                  backgroundColor: 'rgba(255,255,255,0.97)',
-                  borderRadius: '0.75rem',
-                  padding: '12px 18px',
-                  minWidth: '160px',
+                  backgroundColor: 'rgba(255,255,255,0.97)', borderRadius: '0.75rem',
+                  padding: '12px 18px', minWidth: '160px',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
                 }}>
                   <p style={{ margin: '0 0 5px', fontSize: '9px', fontWeight: '500', color: C.onSurfaceVariant, letterSpacing: '0.07em' }}>
@@ -321,10 +304,7 @@ export default function Admin() {
                       {s.value}
                     </p>
                     {s.delta != null && (
-                      <span style={{
-                        fontSize: '12px', fontWeight: '500',
-                        color: String(s.delta).startsWith('-') ? C.secondary : C.error,
-                      }}>
+                      <span style={{ fontSize: '12px', fontWeight: '500', color: String(s.delta).startsWith('-') ? C.secondary : C.error }}>
                         {String(s.delta).startsWith('-') || String(s.delta).startsWith('+') ? s.delta : `+${s.delta}`}
                       </span>
                     )}
@@ -333,16 +313,12 @@ export default function Admin() {
               ))}
             </div>
 
-            {/* Threat type pills */}
+            {/* Threat pills */}
             {Object.keys(byThreat).length > 0 && (
-              <div style={{
-                position: 'absolute', top: '92px', left: '16px', zIndex: 999,
-                display: 'flex', gap: '6px', flexWrap: 'wrap', maxWidth: '500px',
-              }}>
+              <div style={{ position: 'absolute', top: '92px', left: '16px', zIndex: 999, display: 'flex', gap: '6px', flexWrap: 'wrap', maxWidth: '500px' }}>
                 {Object.entries(byThreat).map(([type, count]) => (
                   <span key={type} style={{
-                    fontSize: '11px', fontWeight: '500',
-                    padding: '4px 10px', borderRadius: '9999px',
+                    fontSize: '11px', fontWeight: '500', padding: '4px 10px', borderRadius: '9999px',
                     backgroundColor: 'rgba(255,255,255,0.95)',
                     color: THREAT_COLORS[type] || '#888',
                     border: `0.5px solid ${THREAT_COLORS[type] || '#888'}`,
@@ -355,29 +331,13 @@ export default function Admin() {
 
             {/* Map */}
             <div style={{ flex: 1, overflow: 'hidden' }}>
-              <MapContainer
-                center={[37.7749, -122.4194]}
-                zoom={12}
-                zoomControl={false}
-                style={{ height: '100%', width: '100%', backgroundColor: '#0a0a0a' }}
-              >
-                <TileLayer
-                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                  attribution='&copy; OpenStreetMap &copy; CARTO'
-                />
+              <MapContainer center={[37.7749, -122.4194]} zoom={12} zoomControl={false}
+                style={{ height: '100%', width: '100%', backgroundColor: '#0a0a0a' }}>
+                <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" attribution='&copy; OpenStreetMap &copy; CARTO' />
                 {viewModes.densityHeatmap && <HeatmapLayer points={points} />}
                 {viewModes.nodeClustering && points.map((p, i) => (
-                  <CircleMarker
-                    key={i}
-                    center={[p.lat, p.lng]}
-                    radius={6}
-                    pathOptions={{
-                      color: '#fff',
-                      weight: 2,
-                      fillColor: THREAT_COLORS[p.threat_type] || THREAT_COLORS.unknown,
-                      fillOpacity: 0.9,
-                    }}
-                  />
+                  <CircleMarker key={i} center={[p.lat, p.lng]} radius={6}
+                    pathOptions={{ color: '#fff', weight: 2, fillColor: THREAT_COLORS[p.threat_type] || THREAT_COLORS.unknown, fillOpacity: 0.9 }} />
                 ))}
                 <ZoomControls />
               </MapContainer>
@@ -386,18 +346,15 @@ export default function Admin() {
             {/* Legend */}
             <div style={{
               position: 'absolute', bottom: '52px', left: '16px', zIndex: 999,
-              backgroundColor: 'rgba(255,255,255,0.97)',
-              borderRadius: '0.875rem', padding: '14px 18px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
+              backgroundColor: 'rgba(255,255,255,0.97)', borderRadius: '0.875rem',
+              padding: '14px 18px', boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
             }}>
-              <p style={{ margin: '0 0 10px', fontSize: '9px', fontWeight: '500', color: C.onSurfaceVariant, letterSpacing: '0.07em' }}>
-                ANALYSIS LEGEND
-              </p>
+              <p style={{ margin: '0 0 10px', fontSize: '9px', fontWeight: '500', color: C.onSurfaceVariant, letterSpacing: '0.07em' }}>ANALYSIS LEGEND</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {[
-                  { label: 'Critical Event', color: '#E24B4A' },
-                  { label: 'Active Monitoring', color: '#1a1a1a' },
-                  { label: 'Nominal Activity', color: '#9aa0a6' },
+                  { label: 'Critical Event',     color: '#E24B4A' },
+                  { label: 'Active Monitoring',  color: '#1a1a1a' },
+                  { label: 'Nominal Activity',   color: '#9aa0a6' },
                 ].map((l) => (
                   <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <div style={{ width: '9px', height: '9px', borderRadius: '9999px', backgroundColor: l.color }} />
@@ -434,16 +391,12 @@ export default function Admin() {
           {/* Right panel */}
           <div style={{
             width: '272px', flexShrink: 0,
-            backgroundColor: C.surface,
-            borderLeft: `1px solid ${C.outlineVariant}`,
-            display: 'flex', flexDirection: 'column',
-            overflowY: 'auto',
+            backgroundColor: C.surface, borderLeft: `1px solid ${C.outlineVariant}`,
+            display: 'flex', flexDirection: 'column', overflowY: 'auto',
           }}>
             <div style={{
-              padding: '14px 18px',
-              borderBottom: `1px solid ${C.outlineVariant}`,
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              flexShrink: 0,
+              padding: '14px 18px', borderBottom: `1px solid ${C.outlineVariant}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0,
             }}>
               <span style={{ fontSize: '13px', fontWeight: '500', color: C.onSurface }}>Map Filters</span>
               <button
@@ -453,25 +406,21 @@ export default function Admin() {
                   setActiveWindow('Last 24 Hours');
                   setSeverityPos(55);
                 }}
-                style={{
-                  border: 'none', backgroundColor: 'transparent',
-                  fontSize: '12px', fontWeight: '400', color: C.onSurfaceVariant,
-                  cursor: 'pointer', fontFamily: "'Inter', sans-serif",
-                }}>Reset</button>
+                style={{ border: 'none', backgroundColor: 'transparent', fontSize: '12px', fontWeight: '400', color: C.onSurfaceVariant, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
+                Reset
+              </button>
             </div>
 
             <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '22px' }}>
 
               {/* Incident categories */}
               <div>
-                <p style={{ margin: '0 0 11px', fontSize: '10px', fontWeight: '500', color: C.onSurfaceVariant, letterSpacing: '0.07em' }}>
-                  INCIDENT CATEGORY
-                </p>
+                <p style={{ margin: '0 0 11px', fontSize: '10px', fontWeight: '500', color: C.onSurfaceVariant, letterSpacing: '0.07em' }}>INCIDENT CATEGORY</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '11px' }}>
                   {[
                     { key: 'physical_disturbance', label: 'Physical Disturbance' },
                     { key: 'harassment_protocols', label: 'Harassment Protocols' },
-                    { key: 'emergency_support', label: 'Emergency Support' },
+                    { key: 'emergency_support',    label: 'Emergency Support' },
                   ].map(({ key, label }) => (
                     <div key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <span style={{ fontSize: '13px', fontWeight: '400', color: C.onSurface }}>{label}</span>
@@ -481,16 +430,12 @@ export default function Admin() {
                 </div>
               </div>
 
-              {/* Severity threshold */}
+              {/* Severity */}
               <div>
-                <p style={{ margin: '0 0 11px', fontSize: '10px', fontWeight: '500', color: C.onSurfaceVariant, letterSpacing: '0.07em' }}>
-                  SEVERITY THRESHOLD
-                </p>
-                <input
-                  type="range" min="0" max="100" value={severityPos}
+                <p style={{ margin: '0 0 11px', fontSize: '10px', fontWeight: '500', color: C.onSurfaceVariant, letterSpacing: '0.07em' }}>SEVERITY THRESHOLD</p>
+                <input type="range" min="0" max="100" value={severityPos}
                   onChange={(e) => setSeverityPos(Number(e.target.value))}
-                  style={{ width: '100%', accentColor: C.onSurface, cursor: 'pointer' }}
-                />
+                  style={{ width: '100%', accentColor: C.onSurface, cursor: 'pointer' }} />
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
                   {['LOW PRIORITY', 'ELEVATED', 'CRITICAL'].map((l) => (
                     <span key={l} style={{ fontSize: '9px', fontWeight: '400', color: C.onSurfaceVariant, letterSpacing: '0.03em' }}>{l}</span>
@@ -500,35 +445,24 @@ export default function Admin() {
 
               {/* Temporal window */}
               <div>
-                <p style={{ margin: '0 0 11px', fontSize: '10px', fontWeight: '500', color: C.onSurfaceVariant, letterSpacing: '0.07em' }}>
-                  TEMPORAL WINDOW
-                </p>
+                <p style={{ margin: '0 0 11px', fontSize: '10px', fontWeight: '500', color: C.onSurfaceVariant, letterSpacing: '0.07em' }}>TEMPORAL WINDOW</p>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '7px' }}>
                   {['Last 24 Hours', 'Last 7 Days', 'Current Month', 'Historical...'].map((w) => (
-                    <button
-                      key={w}
-                      onClick={() => setActiveWindow(w)}
-                      style={{
-                        padding: '8px 6px',
-                        borderRadius: '0.625rem',
-                        border: `1px solid ${activeWindow === w ? C.onSurface : C.outlineVariant}`,
-                        backgroundColor: activeWindow === w ? C.onSurface : C.surface,
-                        color: activeWindow === w ? '#fff' : C.onSurface,
-                        fontSize: '11px', fontWeight: '400',
-                        cursor: 'pointer', fontFamily: "'Inter', sans-serif",
-                        transition: 'all 0.15s ease',
-                      }}
-                    >
-                      {w}
-                    </button>
+                    <button key={w} onClick={() => setActiveWindow(w)} style={{
+                      padding: '8px 6px', borderRadius: '0.625rem',
+                      border: `1px solid ${activeWindow === w ? C.onSurface : C.outlineVariant}`,
+                      backgroundColor: activeWindow === w ? C.onSurface : C.surface,
+                      color: activeWindow === w ? '#fff' : C.onSurface,
+                      fontSize: '11px', fontWeight: '400',
+                      cursor: 'pointer', fontFamily: "'Inter', sans-serif",
+                      transition: 'all 0.15s ease',
+                    }}>{w}</button>
                   ))}
                 </div>
               </div>
 
               {/* View modes */}
-              <div style={{
-                backgroundColor: C.bg, borderRadius: '0.875rem', padding: '14px 15px',
-              }}>
+              <div style={{ backgroundColor: C.bg, borderRadius: '0.875rem', padding: '14px 15px' }}>
                 <p style={{ margin: '0 0 11px', fontSize: '13px', fontWeight: '500', color: C.onSurface }}>View Modes</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '11px' }}>
                   {[
@@ -549,11 +483,9 @@ export default function Admin() {
                 backgroundColor: C.onSurface, border: 'none',
                 borderRadius: '0.75rem', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
-                fontFamily: "'Inter', sans-serif",
-                fontSize: '13px', fontWeight: '500', color: '#fff',
+                fontFamily: "'Inter', sans-serif", fontSize: '13px', fontWeight: '500', color: '#fff',
               }}>
-                <Upload size={14} color="#fff" />
-                Export Dataset
+                <Upload size={14} color="#fff" />Export Dataset
               </button>
             </div>
           </div>
@@ -561,10 +493,7 @@ export default function Admin() {
       </div>
 
       <style>{`
-        @keyframes pulseDot {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.4; }
-        }
+        @keyframes pulseDot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
         .leaflet-container { background: #0a0a0a !important; }
       `}</style>
     </div>

@@ -8,7 +8,7 @@ Calling 112 in an emergency takes 15+ seconds. Unlock your phone, open the diale
 
 ## What it does
 
-SafeHer is a Progressive Web App for women's safety in Kazakhstan. Press the SOS button and three things happen simultaneously: your GPS coordinates are captured, a short audio clip starts recording in the background, and an incident is created in the system. The audio goes to Groq Whisper for transcription, then to LLaMA 70B which classifies the threat — physical assault, stalking, medical emergency, domestic situation — and returns which responders to route to. All of this happens in under 5 seconds without the user needing to speak or unlock anything.
+SafeHer is a Progressive web application for women's safety in Kazakhstan. Press the SOS button and three things happen simultaneously: your GPS coordinates are captured, a short audio clip starts recording in the background, and an incident is created in the system. The audio goes to Groq Whisper for transcription, then to LLaMA 70B which classifies the threat — physical assault, stalking, medical emergency, domestic situation — and returns which responders to route to. All of this happens in under 5 seconds without the user needing to speak or unlock anything.
 
 During an active SOS the user gets a live map showing their location and the nearest crisis centers, plus a silent chat window where they can type to the AI assistant. Responses are short and actionable and never ask the user to speak or make noise.
 
@@ -28,7 +28,9 @@ The resource chatbot uses the same LLaMA model but with a different system promp
 
 ## Data
 
-`data/kz_crisis_centers.json` contains real crisis center data for cities across Kazakhstan including Almaty, Astana, Atyrau, Shymkent, and Karaganda — names, types, phone numbers, and operating hours compiled from public government and NGO sources. This is what powers both the map markers and the chatbot's answers.
+`data/kz_crisis_centers.json` contains real crisis center data for cities across Kazakhstan including Almaty, Astana, Atyrau, Shymkent, and Karaganda — names, types, phone numbers, and operating hours compiled from public government and NGO sources. This powers both the map markers and the chatbot's answers.
+
+`data/kz_legal_resources.json` contains legal resources and rights information for women across Kazakhstan — used by the Resources chatbot to answer questions about harassment reporting, legal protections, and how to access support services.
 
 `data/incidents_seed.csv` is an anonymized dataset of incident points used to populate the admin heatmap. All personal identifiers have been removed.
 
@@ -50,17 +52,25 @@ docker run -d --name safeher-db -e POSTGRES_PASSWORD=safeher -e POSTGRES_DB=safe
 Backend:
 ```bash
 cd api
-python -m venv venv && source venv/bin/activate
+python -m venv venv
+source venv/bin/activate        # macOS/Linux
+venv\Scripts\activate           # Windows
 pip install -r requirements.txt
-# add GROQ_API_KEY and DATABASE_URL to .env
 uvicorn main:app --reload --port 8000
 ```
+> API available at: http://localhost:8000  
+> Interactive API docs at: http://localhost:8000/docs
 
 Frontend:
 ```bash
 cd pwa
+python -m venv venv
+source venv/bin/activate        # macOS/Linux
+venv\Scripts\activate           # Windows
 npm install && npm run dev
 ```
+> App available at: http://localhost:5173  
+> Admin dashboard at: http://localhost:5173/admin
 
 ---
 
@@ -69,8 +79,6 @@ npm install && npm run dev
 - SMS notifications to trusted contacts are mocked as an in-app log — the notification object is real, the SMS delivery is simulated. 
 - The 112 integration produces a pre-filled brief that would be submitted to emergency services in a production version. 
 - Everything else — GPS, audio recording, Whisper transcription, LLaMA classification, the crisis center data, and the chatbot - is real and working.
-
----
 
 ## Project structure
 
@@ -86,16 +94,28 @@ safeher/
 │       ├── classifier.py   # Whisper → LLM pipeline
 │       └── coordinator.py  # contact + 112 notification
 ├── pwa/src/
+│   ├── hooks/
+│   │   ├── useGeolocation.js     # live GPS tracking
+│   │   ├── useShakeDetector.js   # shake-to-trigger SOS
+│   │   └── useVoiceKeyword.js    # keyword voice detection
 │   ├── pages/
-│   │   ├── Home.jsx        # SOS trigger
-│   │   ├── ActiveSOS.jsx   # live map + silent chat
-│   │   ├── Resources.jsx   # chatbot + crisis center cards
-│   │   └── Admin.jsx       # heatmap dashboard
+│   │   ├── Home.jsx              # SOS trigger
+│   │   ├── ActiveSOS.jsx         # live map + silent chat
+│   │   ├── Resources.jsx         # chatbot + crisis center cards
+│   │   ├── Profile.jsx           # user profile & trusted contacts
+│   │   ├── Admin.jsx             # heatmap dashboard
+│   │   ├── Overview.jsx          # admin overview & key metrics
+│   │   ├── ActivityLogs.jsx      # incident history & audit trail
+│   │   ├── AdvancedIntel.jsx     # threat analytics & patterns
+│   │   └── SystemConfig.jsx      # system settings & configuration
+│   ├── services/
+│   │   └── api.js                # API client & endpoint helpers
 │   └── components/
 │       ├── MapView.jsx
 │       └── ChatPanel.jsx
 └── data/
     ├── kz_crisis_centers.json
+    ├── kz_legal_resources.json
     └── incidents_seed.csv
 ```
 
